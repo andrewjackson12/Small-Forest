@@ -1,0 +1,157 @@
+<!--
+    Small forest scene for COSC3306 Assignment 2.
+    All work individually completed by Andrew Jackson.
+    Student number: 239445000
+-->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Small Forest Scene with Three.js</title>
+    <style>
+        body { margin: 0; }
+        canvas { width: 100%; height: 100% }
+    </style>
+</head>
+<body>
+
+
+</script>
+   
+    <script type="module">
+        // Import the Three.js module
+        import * as THREE from 'https://unpkg.com/three@0.111.0/build/three.module.js';
+
+
+
+        //Fires load event when page is loaded
+        window.onload = function() {
+            // Define the WebGL renderer:
+            var renderer = new THREE.WebGLRenderer(); //specify the we will use WebGL
+            renderer.setSize(800, 600); //scene size (Width, Height)
+            document.body.appendChild(renderer.domElement);
+
+            // Initialize (create) the scene:
+            var scene = new THREE.Scene();
+            
+            // Define the camera:
+            var camera = new THREE.PerspectiveCamera(
+                35,             // Field of view
+                800 / 600,      // Aspect ratio
+                0.1,            // Near plane
+                10000           // Far plane
+            );
+            camera.position.x = 0;  //default value anyway
+            camera.position.y = 160;  
+            camera.position.z = 200;
+
+
+            //NEW skydome test
+          
+            //Creating sphere geometry
+            var skyDome2 = new THREE.SphereGeometry(3000,100, 100);
+            //Loading texture  - NEEDS LOCAL SERVER TO FUNCTION PROPERLY
+            var loader  = new THREE.TextureLoader(),
+                texture = loader.load( "http://localhost:8080/animatedsky.jpg" );
+
+                var material2 = new THREE.MeshPhongMaterial({
+                    map: texture,
+                    side: THREE.BackSide
+                });
+
+            var sky = new THREE.Mesh(skyDome2, material2);
+           
+            sky.material.side = THREE.BackSide;
+            //Adding the skydome to the scene
+            scene.add(sky);
+
+            
+
+            //fog creation
+            scene.fog = new THREE.Fog( 0xC9C9C9, 1, 6000 );
+            //fog creation end
+
+            //PLANE
+            //Creating plane and adding it to scene
+            const geometry3 = new THREE.PlaneGeometry( 300, 320 );
+            const material3 = new THREE.MeshStandardMaterial( {color: 0x703913} );
+            const plane = new THREE.Mesh( geometry3, material3 );
+
+            scene.add( plane );
+            //END PLANE
+
+            //Adding light to the scene
+            var ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+
+            var directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+            directionalLight.position.set(0, 1, 0);
+            scene.add(directionalLight);
+            //END new skydome test
+
+
+            //BEGIN random tree generation
+            // Function to create a single tree
+            function createTree() {
+
+                //Create cylinder for tree trunk
+                const trunkGeometry = new THREE.CylinderGeometry(0.5, 0.5, 5, 12);
+                const trunkMaterial = new THREE.MeshLambertMaterial({color: 0x8B4513});
+                const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
+                
+                //Create cone shape for foliage (leaves on the tree)
+                const foliageGeometry = new THREE.ConeGeometry(4, 10, 16);
+                const foliageMaterial = new THREE.MeshLambertMaterial({color: 0x00FF00});
+                const foliage = new THREE.Mesh(foliageGeometry, foliageMaterial);
+                foliage.position.y = 5; //Putting the foliage directly above the trunk
+                
+                //Creating group and adding items to group to ensure they stay together
+                const tree = new THREE.Group();
+                tree.add(trunk);
+                tree.add(foliage);
+                
+                return tree;
+            }
+
+            // Function to add trees to the scene
+            function addTrees(scene, numberOfTrees) {
+                //Loop that creates the number of trees desired
+                for (let i = 0; i < numberOfTrees; i++) {
+                    const tree = createTree();
+                    
+                    //Generate random x and z coords to position trees
+                    const x = Math.random() * (100 - (-100)) + (-100); 
+                    const z = Math.random() * (200 - (-200)) + (-200); 
+                    tree.position.set(x, 150, z);
+                    
+                    //Randomly scaling trees between 0.75 and 1.25
+                    const scale = Math.random() * 1.25 + 0.75; 
+                    tree.scale.set(scale, scale, scale);
+                    
+                    //Rotating some trees a random number of radians between -0.05 and 0.05
+                    if (Math.random() > 0.5) {
+                        const rotation = Math.random() * 0.05 - 0.05;
+                        tree.rotation.z = rotation;
+                    }
+                    
+                    scene.add(tree);
+                }
+            }
+
+            //Calling addTrees function to add 100 trees to the scene
+            addTrees(scene, 100);
+
+            //END random tree generation
+
+            //Animate function
+            var animate = function() {
+                requestAnimationFrame(animate);
+                renderer.render(scene, camera);
+            };
+
+            //Animate function call
+            animate();
+        }
+    </script>
+</body>
+</html>
